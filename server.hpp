@@ -30,7 +30,7 @@ struct Server {
 		size_t len = sizeof(Message);
 
 		zmq::message_t message(len);
-		memcpy(message.data(), msg.data(), len);
+		memcpy(message.data(), msg, len);
 		m_socket.send(message);
 		std::cout << ".";
 		return 1;
