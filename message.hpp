@@ -68,8 +68,8 @@ struct Message {
 	};
 	
 	std::array<float, 16> hmd;
-	std::vector<Controller> controller;
-	std::vector<Tracker> tracker;
+	std::array<Controller, 4> controller;
+	std::array<Tracker, 2> tracker;
 };
 
 
