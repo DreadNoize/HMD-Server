@@ -18,6 +18,7 @@ int main(int argc, char** argv) {
 
     Server server("tcp://141.54.147.52:7770"); //should be adjusted, maybe via user input?
     bool event_flag;
+    int iter_c, iter_t = 0;
 
     std::cout << "Initializing..." << std::endl;
 
@@ -112,7 +113,8 @@ int main(int argc, char** argv) {
 
 
 
-					message.controller.push_back(ct);
+					message.controller[iter_c] = ct;
+					iter_c = iter_c + 1;
 
 				}
 				if (vr::VRSystem()->GetTrackedDeviceClass(i) == vr::TrackedDeviceClass_TrackingReference) {
@@ -133,10 +135,12 @@ int main(int argc, char** argv) {
 					tr.matrix[13] = pos.m[1][3];
 					tr.matrix[14] = pos.m[2][3];
 
-					message.tracker.push_back(tr);
+					message.tracker[iter_t] = tr;
+					iter_t = iter_t + 1;
 				}
 			}
 		}
+		
 		server.send(message);
     }
 
