@@ -9,6 +9,7 @@
 struct Controller{ // adapted for vive controller
 	Controller() :
 		status{false},
+		id{ -1 },
 		app_menu{false},
 		grip{false},
 		pad_touch{false},
@@ -26,8 +27,13 @@ struct Controller{ // adapted for vive controller
 		matrix[15] = 1;
 	};
 
+	bool operator== (int con) {
+		return id == con;
+	};
+
 	std::array<float, 16> matrix;
 	bool status;
+	short id;
 	bool app_menu;	// Application Menu button on Vive controller
 	bool grip;		// Grip button on Vive controller
 	bool pad_touch; // touch/untouch on Touchpad
@@ -40,7 +46,8 @@ struct Controller{ // adapted for vive controller
 
 struct Tracker { // e.g. Lighthouse or Oculus tracking device
 	Tracker() :
-		status{false}
+		status{false},
+		id{ -1 }
 	{
 		matrix.fill(0);
 		// initialize identity matrix
@@ -52,6 +59,7 @@ struct Tracker { // e.g. Lighthouse or Oculus tracking device
 
 	std::array<float, 16> matrix;
 	bool status;
+	short id;
 };
 
 struct Message {
@@ -62,9 +70,14 @@ struct Message {
 		hmd[5] = 1;
 		hmd[10] = 1;
 		hmd[15] = 1;
-	};
-	Message(vr::IVRSystem* vrsys) {
-		
+
+		for (int i; i < 4; ++i) {
+			controller[i] = Controller();
+		}
+		for (int j  = 0; j < 2; ++j)
+		{
+			tracker[j] = Tracker();
+		}
 	};
 	
 	std::array<float, 16> hmd;

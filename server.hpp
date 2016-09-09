@@ -18,7 +18,7 @@ struct Server {
 		m_socket.bind(address.c_str());
 	}
 
-	bool send(Message msg) {
+	bool send(Message* msg) {
 
 		// DEBUG
 		/*
@@ -27,6 +27,7 @@ struct Server {
 		std::cout << matrix[2] << " " << matrix[6] << " " << matrix[10] << " " << matrix[14] << std::endl;
 		std::cout << matrix[3] << " " << matrix[7] << " " << matrix[11] << " " << matrix[15] << std::endl;
 		*/
+
 		size_t len = sizeof(Message);
 
 		zmq::message_t message(len);

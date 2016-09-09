@@ -11,14 +11,15 @@
 #include "server.hpp"
 #include "message.hpp"
 #include <exception>
+#include <algorithm>
 
 
 int main(int argc, char** argv) {
   // init zmq server
 
-    Server server("tcp://141.54.147.52:7770"); //should be adjusted, maybe via user input?
+    Server server("tcp://141.54.147.35:7770"); //should be adjusted, maybe via user input?
     bool event_flag;
-    int iter_c, iter_t = 0;
+
 
     std::cout << "Initializing..." << std::endl;
 
@@ -35,15 +36,18 @@ int main(int argc, char** argv) {
     while(true) {
 		Message message;
 		vr::VREvent_t event;
-		
-		event_flag = vrsys->PollNextEvent(&event, sizeof(event)));
+		vr::TrackedDevicePose_t pose;
+		vr::VRControllerState_t *c_state;
+		int iter_c = 0;
+		int iter_t = 0;
+
 		//set coordinates
 		vrsys->GetDeviceToAbsoluteTrackingPose(vr::TrackingUniverseStanding, 0.0, devices, vr::k_unMaxTrackedDeviceCount);
-		for (int i = 0; i < vr::k_unMaxTrackedDeviceCount; ++i)
-		{
+		for (int i = 0; i < vr::k_unMaxTrackedDeviceCount; ++i) {
 			if (devices[i].bPoseIsValid && devices[i].bDeviceIsConnected) {
 				if (vr::VRSystem()->GetTrackedDeviceClass(i) == vr::TrackedDeviceClass_HMD) {
 					vr::HmdMatrix34_t pos = devices[i].mDeviceToAbsoluteTracking;
+					//std::cout << "HMD found!" << std::endl;
 
 					// inverted matrix
 					message.hmd[0] = pos.m[0][0];
@@ -59,12 +63,13 @@ int main(int argc, char** argv) {
 					message.hmd[13] = pos.m[1][3];
 					message.hmd[14] = pos.m[2][3];
 				}
-				if (vr::VRSystem()->GetTrackedDeviceClass(i) == vr::TrackedDeviceClass_Controller) {
+				else if (vr::VRSystem()->GetTrackedDeviceClass(i) == vr::TrackedDeviceClass_Controller) {
 					Controller ct;
 					ct.status = true;
-					
-					vr::VRControllerState_t *c_state;
+					ct.id = i;
+
 					vr::HmdMatrix34_t pos = devices[i].mDeviceToAbsoluteTracking;
+					//std::cout << "Controller found!" << std::endl;
 
 					ct.matrix[0] = pos.m[0][0];
 					ct.matrix[1] = pos.m[1][0];
@@ -79,48 +84,19 @@ int main(int argc, char** argv) {
 					ct.matrix[13] = pos.m[1][3];
 					ct.matrix[14] = pos.m[2][3];
 
-					if(event_flag) {
-						if (event.data.controller.button == vr::k_EButton_ApplicationMenu) {
-							if (event.eventType == vr::VREvent_ButtonPress) {
-								ct.app_menu = true;
-							}
-						}
-						else if (event.data.controller.button == vr::k_EButton_Grip) {
-							if (event.eventType == vr::VREvent_ButtonPress) {
-								ct.grip = true;
-							}
-						}
-						else if (event.data.controller.button == vr::k_EButton_SteamVR_Trigger) {
-							if (event.eventType == vr::VREvent_ButtonPress) {
-								ct.trigger_t = true;
-							}
-						}
-						else if (event.data.controller.button == vr::k_EButton_SteamVR_Touchpad) {
-							if (event.eventType == vr::VREvent_ButtonTouch) {
-								ct.pad_touch = true;
-								ct.pad_x = c_state->rAxis[1].x;
-								ct.pad_y = c_state->rAxis[1].y;
-							}
-						}
-						else if (event.data.controller.button == vr::k_EButton_SteamVR_Touchpad) {
-							if (event.eventType == vr::VREvent_ButtonPress) {
-								ct.pad_press = true;
-							}
-						}
-					}
-
-					ct.trigger = c_state->rAxis[3].x;
-
-
+					//ct.trigger = c_state->rAxis[3].x;
 
 					message.controller[iter_c] = ct;
 					iter_c = iter_c + 1;
 
 				}
-				if (vr::VRSystem()->GetTrackedDeviceClass(i) == vr::TrackedDeviceClass_TrackingReference) {
+				else if (vr::VRSystem()->GetTrackedDeviceClass(i) == vr::TrackedDeviceClass_TrackingReference) {
 					Tracker tr;
 					tr.status = true;
+					tr.id = i;
 					vr::HmdMatrix34_t pos = devices[i].mDeviceToAbsoluteTracking;
+
+					//std::cout << "Tracking device found!" << std::endl;
 
 					tr.matrix[0] = pos.m[0][0];
 					tr.matrix[1] = pos.m[1][0];
@@ -140,8 +116,41 @@ int main(int argc, char** argv) {
 				}
 			}
 		}
+		//while (vrsys->PollNextEventWithPose(vr::TrackingUniverseStanding, &event, sizeof(event), &pose))
+		//{
+		//	if (vrsys->GetTrackedDeviceClass(event.trackedDeviceIndex) == vr::TrackedDeviceClass_Controller) {
+		//		if (event.eventType == vr::VREvent_ButtonPress) {
+		//			if (event.data.controller.button == vr::k_EButton_ApplicationMenu) {
+		//				auto it = std::find(message.controller.begin(), message.controller.end(), event.trackedDeviceIndex);
+		//				it->app_menu = true;
+		//			}
+		//			else if (event.data.controller.button == vr::k_EButton_Grip) {
+		//				auto it = std::find(message.controller.begin(), message.controller.end(), event.trackedDeviceIndex);
+		//				it->app_menu = true;
+		//			}
+		//			else if (event.data.controller.button == vr::k_EButton_SteamVR_Trigger) {
+		//				auto it = std::find(message.controller.begin(), message.controller.end(), event.trackedDeviceIndex);
+		//				it->app_menu = true;
+		//				std::cout << "Triggerd!!!" << std::endl;
+		//			}
+		//			else if (event.data.controller.button == vr::k_EButton_SteamVR_Touchpad) {
+		//				auto it = std::find(message.controller.begin(), message.controller.end(), event.trackedDeviceIndex);
+		//				it->pad_press = true;
+		//			}
+		//		}
+		//		else if (event.eventType == vr::VREvent_ButtonTouch) {
+		//			if (event.data.controller.button == vr::k_EButton_SteamVR_Touchpad) {
+		//				auto it = std::find(message.controller.begin(), message.controller.end(), event.trackedDeviceIndex);
+		//				it->pad_touch = true;
+		//				//it->pad_x = c_state->rAxis[1].x;
+		//				//it->pad_y = c_state->rAxis[1].y;
+		//			}
+		//		}
+		//	}
+		//}
 		
-		server.send(message);
+		server.send(&message);
+		
     }
 
 }
