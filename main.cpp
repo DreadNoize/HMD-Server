@@ -36,8 +36,8 @@ int main(int argc, char** argv) {
     while(true) {
 		Message message;
 		vr::VREvent_t event;
-		vr::TrackedDevicePose_t pose;
-		vr::VRControllerState_t *c_state;
+		vr::TrackedDevicePose_t* pose;
+		vr::VRControllerState_t c_state;
 		int iter_c = 0;
 		int iter_t = 0;
 
@@ -48,6 +48,8 @@ int main(int argc, char** argv) {
 				if (vr::VRSystem()->GetTrackedDeviceClass(i) == vr::TrackedDeviceClass_HMD) {
 					vr::HmdMatrix34_t pos = devices[i].mDeviceToAbsoluteTracking;
 					//std::cout << "HMD found!" << std::endl;
+					message.hmd_id = i;
+					//std::cout << "IDH = " << message.hmd_id << std::endl;
 
 					// inverted matrix
 					message.hmd[0] = pos.m[0][0];
@@ -67,6 +69,7 @@ int main(int argc, char** argv) {
 					Controller ct;
 					ct.status = true;
 					ct.id = i;
+					//std::cout << "IDC = " << ct.id << std::endl;
 
 					vr::HmdMatrix34_t pos = devices[i].mDeviceToAbsoluteTracking;
 					//std::cout << "Controller found!" << std::endl;
@@ -84,16 +87,50 @@ int main(int argc, char** argv) {
 					ct.matrix[13] = pos.m[1][3];
 					ct.matrix[14] = pos.m[2][3];
 
-					//ct.trigger = c_state->rAxis[3].x;
-
+					
 					message.controller[iter_c] = ct;
+					//std::cout << iter_c << std::endl;
 					iter_c = iter_c + 1;
 
+					bool state = vrsys->GetControllerState(i, &c_state);
+					if (!state)	{
+						continue;
+					}
+
+					//Buttons and Values
+					ct.trigger = c_state.rAxis[3].x;
+					
+					if (c_state.ulButtonTouched == vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad)) {
+						//std::cout << "Touchpad touched" << std::endl;
+						ct.pad_touch = true;
+						ct.pad_x = c_state.rAxis[1].x;
+						ct.pad_y = c_state.rAxis[1].y;
+					}
+
+					if (c_state.ulButtonPressed == vr::ButtonMaskFromId(vr::k_EButton_ApplicationMenu)) {
+						//std::cout << "Menu button pressed" << std::endl;
+						ct.app_menu = true;
+					}
+					else if (c_state.ulButtonPressed == vr::ButtonMaskFromId(vr::k_EButton_Grip)) {
+						//std::cout << "Grip button pressed" << std::endl;
+						ct.grip = true;
+					}
+					else if (c_state.ulButtonPressed == vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Trigger)) {
+						//std::cout << "Trigger pressed" << std::endl;
+						ct.trigger_p = true;
+					}
+					else if (c_state.ulButtonPressed == vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad)) {
+						//std::cout << "Touchpad pressed" << std::endl;
+						ct.pad_press = true;
+					}
+
+					
 				}
 				else if (vr::VRSystem()->GetTrackedDeviceClass(i) == vr::TrackedDeviceClass_TrackingReference) {
 					Tracker tr;
 					tr.status = true;
 					tr.id = i;
+					//std::cout << "IDT = " << tr.id << std::endl;
 					vr::HmdMatrix34_t pos = devices[i].mDeviceToAbsoluteTracking;
 
 					//std::cout << "Tracking device found!" << std::endl;
@@ -116,39 +153,7 @@ int main(int argc, char** argv) {
 				}
 			}
 		}
-		//while (vrsys->PollNextEventWithPose(vr::TrackingUniverseStanding, &event, sizeof(event), &pose))
-		//{
-		//	if (vrsys->GetTrackedDeviceClass(event.trackedDeviceIndex) == vr::TrackedDeviceClass_Controller) {
-		//		if (event.eventType == vr::VREvent_ButtonPress) {
-		//			if (event.data.controller.button == vr::k_EButton_ApplicationMenu) {
-		//				auto it = std::find(message.controller.begin(), message.controller.end(), event.trackedDeviceIndex);
-		//				it->app_menu = true;
-		//			}
-		//			else if (event.data.controller.button == vr::k_EButton_Grip) {
-		//				auto it = std::find(message.controller.begin(), message.controller.end(), event.trackedDeviceIndex);
-		//				it->app_menu = true;
-		//			}
-		//			else if (event.data.controller.button == vr::k_EButton_SteamVR_Trigger) {
-		//				auto it = std::find(message.controller.begin(), message.controller.end(), event.trackedDeviceIndex);
-		//				it->app_menu = true;
-		//				std::cout << "Triggerd!!!" << std::endl;
-		//			}
-		//			else if (event.data.controller.button == vr::k_EButton_SteamVR_Touchpad) {
-		//				auto it = std::find(message.controller.begin(), message.controller.end(), event.trackedDeviceIndex);
-		//				it->pad_press = true;
-		//			}
-		//		}
-		//		else if (event.eventType == vr::VREvent_ButtonTouch) {
-		//			if (event.data.controller.button == vr::k_EButton_SteamVR_Touchpad) {
-		//				auto it = std::find(message.controller.begin(), message.controller.end(), event.trackedDeviceIndex);
-		//				it->pad_touch = true;
-		//				//it->pad_x = c_state->rAxis[1].x;
-		//				//it->pad_y = c_state->rAxis[1].y;
-		//			}
-		//		}
-		//	}
-		//}
-		
+			
 		server.send(&message);
 		
     }
