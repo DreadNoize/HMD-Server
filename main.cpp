@@ -94,13 +94,16 @@ int main(int argc, char** argv) {
 					}
 
 					//Buttons and Values
-					ct.trigger = c_state.rAxis[3].x;
+					ct.trigger = c_state.rAxis[1].x;
+					//std::cout << "Trigger: " << ct.trigger << std::endl;
 					
 					if (c_state.ulButtonTouched == vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad)) {
 						//std::cout << "Touchpad touched" << std::endl;
 						ct.pad_touch = true;
-						ct.pad_x = c_state.rAxis[1].x;
-						ct.pad_y = c_state.rAxis[1].y;
+						ct.pad_x = c_state.rAxis[0].x;
+						ct.pad_y = c_state.rAxis[0].y;
+						
+						//std::cout << "Pad: " << ct.pad_x << " | " << ct.pad_y << std::endl;
 					}
 
 					if (c_state.ulButtonPressed == vr::ButtonMaskFromId(vr::k_EButton_ApplicationMenu)) {
