@@ -14,7 +14,7 @@ struct Controller{ // adapted for vive controller
 		grip{false},
 		pad_touch{false},
 		pad_press{false},
-		trigger_t{false},
+		trigger_p{false},
 		pad_x{0.0},
 		pad_y{0.0},
 		trigger{0.0} 
@@ -27,10 +27,6 @@ struct Controller{ // adapted for vive controller
 		matrix[15] = 1;
 	};
 
-	bool operator== (int con) {
-		return id == con;
-	};
-
 	std::array<float, 16> matrix;
 	bool status;
 	short id;
@@ -38,7 +34,7 @@ struct Controller{ // adapted for vive controller
 	bool grip;		// Grip button on Vive controller
 	bool pad_touch; // touch/untouch on Touchpad
 	bool pad_press;	// Touchpad button
-	bool trigger_t;	// Trigger is fully pressed
+	bool trigger_p;	// Trigger is fully pressed
 	float pad_x;	// X values on touchpad
 	float pad_y;	// Y values on touchpad
 	float trigger;	// Trigger value
@@ -80,6 +76,7 @@ struct Message {
 		}
 	};
 	
+	short hmd_id;
 	std::array<float, 16> hmd;
 	std::array<Controller, 4> controller;
 	std::array<Tracker, 2> tracker;
