@@ -88,10 +88,6 @@ int main(int argc, char** argv) {
 					ct.matrix[14] = pos.m[2][3];
 
 					
-					message.controller[iter_c] = ct;
-					//std::cout << iter_c << std::endl;
-					iter_c = iter_c + 1;
-
 					bool state = vrsys->GetControllerState(i, &c_state);
 					if (!state)	{
 						continue;
@@ -123,6 +119,10 @@ int main(int argc, char** argv) {
 						//std::cout << "Touchpad pressed" << std::endl;
 						ct.pad_press = true;
 					}
+
+					message.controller[iter_c] = ct;
+					//std::cout << iter_c << std::endl;
+					iter_c = iter_c + 1;
 
 					
 				}
