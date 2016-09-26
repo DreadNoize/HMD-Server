@@ -16,8 +16,14 @@
 
 int main(int argc, char** argv) {
   // init zmq server
-
-    Server server("tcp://141.54.147.35:7770"); //should be adjusted, maybe via user input?
+    std::string ip_port = "tcp://";
+    if(argc != 2) {
+		std::cerr << "ERROR: You have to give the servers ip and port as one argument!" << std::endl;
+		std::cout << "Usage: HMDServer.exe ip:port" << std::endl;
+		exit(1);
+    }
+    ip_port.append(argv[1]);
+    Server server(ip_port);
     bool event_flag;
 
 
