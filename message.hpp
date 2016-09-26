@@ -59,7 +59,10 @@ struct Tracker { // e.g. Lighthouse or Oculus tracking device
 };
 
 struct Message {
-	Message() {
+	Message() :
+		hmd_status{false},
+		hmd_id{-1}		
+	{
 		hmd.fill(0);
 		// initialize identity matrix
 		hmd[0] = 1;
@@ -76,6 +79,7 @@ struct Message {
 		}
 	};
 	
+	bool hmd_status;
 	short hmd_id;
 	std::array<float, 16> hmd;
 	std::array<Controller, 4> controller;
