@@ -24,8 +24,6 @@ int main(int argc, char** argv) {
     }
     ip_port.append(argv[1]);
     Server server(ip_port);
-    bool event_flag;
-
 
     std::cout << "Initializing..." << std::endl;
 
