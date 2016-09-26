@@ -19,15 +19,6 @@ struct Server {
 	}
 
 	bool send(Message* msg) {
-
-		// DEBUG
-		/*
-		std::cout << matrix[0] << " " << matrix[4] << " " << matrix[8] << " " << matrix[12] << std::endl;
-		std::cout << matrix[1] << " " << matrix[5] << " " << matrix[9] << " " << matrix[13] << std::endl;
-		std::cout << matrix[2] << " " << matrix[6] << " " << matrix[10] << " " << matrix[14] << std::endl;
-		std::cout << matrix[3] << " " << matrix[7] << " " << matrix[11] << " " << matrix[15] << std::endl;
-		*/
-
 		size_t len = sizeof(Message);
 
 		zmq::message_t message(len);
