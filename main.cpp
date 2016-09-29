@@ -52,6 +52,7 @@ int main(int argc, char** argv) {
 				if (vr::VRSystem()->GetTrackedDeviceClass(i) == vr::TrackedDeviceClass_HMD) {
 					vr::HmdMatrix34_t pos = devices[i].mDeviceToAbsoluteTracking;
 					//std::cout << "HMD found!" << std::endl;
+					message.hmd_status = true;
 					message.hmd_id = i;
 					//std::cout << "IDH = " << message.hmd_id << std::endl;
 
