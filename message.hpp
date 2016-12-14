@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef VRSYS_HMD_MESSAGE
 #define VRSYS_HMD_MESSAGE
 
@@ -70,7 +68,7 @@ struct Message {
 		hmd[10] = 1;
 		hmd[15] = 1;
 
-		for (int i; i < 4; ++i) {
+		for (int i = 0; i < 4; ++i) {
 			controller[i] = Controller();
 		}
 		for (int j  = 0; j < 2; ++j)

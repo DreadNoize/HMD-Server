@@ -4,14 +4,13 @@
 // #define WIN32_LEAN_AND_MEAN
 // #endif
 
-#include <openvr.h> 
+
 #include <string>
 #include <iostream>
-#include <fstream>
+
+#include "openvr.h"
 #include "server.hpp"
 #include "message.hpp"
-#include <exception>
-#include <algorithm>
 
 
 int main(int argc, char** argv) {
@@ -39,8 +38,6 @@ int main(int argc, char** argv) {
 	
     while(true) {
 		Message message;
-		vr::VREvent_t event;
-		vr::TrackedDevicePose_t* pose;
 		vr::VRControllerState_t c_state;
 		int iter_c = 0;
 		int iter_t = 0;
