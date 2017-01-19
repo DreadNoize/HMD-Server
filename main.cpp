@@ -42,8 +42,18 @@ int main(int argc, char** argv) {
 		int iter_c = 0;
 		int iter_t = 0;
 
+		// https://github.com/ValveSoftware/openvr/wiki/IVRSystem::GetDeviceToAbsoluteTrackingPose
+		float fSecondsSinceLastVsync;
+		vrsys->GetTimeSinceLastVsync(&fSecondsSinceLastVsync, NULL);
+
+		float fDisplayFrequency = vrsys->GetFloatTrackedDeviceProperty(vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_DisplayFrequency_Float);
+		float fFrameDuration = 1.f / fDisplayFrequency;
+		float fVsyncToPhotons = vrsys->GetFloatTrackedDeviceProperty(vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_SecondsFromVsyncToPhotons_Float);
+
+		float fPredictedSecondsFromNow = fFrameDuration - fSecondsSinceLastVsync + fVsyncToPhotons;
+
 		//set coordinates
-		vrsys->GetDeviceToAbsoluteTrackingPose(vr::TrackingUniverseStanding, 0.0, devices, vr::k_unMaxTrackedDeviceCount);
+		vrsys->GetDeviceToAbsoluteTrackingPose(vr::TrackingUniverseStanding, fPredictedSecondsFromNow, devices, vr::k_unMaxTrackedDeviceCount);
 		for (int i = 0; i < vr::k_unMaxTrackedDeviceCount; ++i) {
 			if (devices[i].bPoseIsValid && devices[i].bDeviceIsConnected) {
 				if (vr::VRSystem()->GetTrackedDeviceClass(i) == vr::TrackedDeviceClass_HMD) {
